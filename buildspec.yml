@@ -1,89 +1,25 @@
 version: 0.2
 
-env:
-  variables:
-    AWS_ACCOUNT_ID: "407927038386"
-    AWS_DEFAULT_REGION: "us-east-1"
-    IMAGE_REPO_NAME: "laravel"
-    IMAGE_TAG: "latest"
-    CONTAINER_NAME: "laravel"
-    ECS_CLUSTER: "laravel-php-app"
-    ECS_SERVICE: "Laravel-app-TD-service-hxr7mmzd"
-
 phases:
   pre_build:
     commands:
-      - echo "Starting build process..."
-      - echo "AWS Account ID: $AWS_ACCOUNT_ID"
-      - echo "AWS Region: $AWS_DEFAULT_REGION"
+      # Simplified ECR login
+      - aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin 407927038386.dkr.ecr.us-east-1.amazonaws.com
       
-      # Method 1: Simple ECR login (recommended)
-      - echo "Method 1: Logging in to Amazon ECR..."
-      - aws ecr get-login-password --region $AWS_DEFAULT_REGION | docker login --username AWS --password-stdin $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com
-      
-      # OR Method 2: Split into two commands
-      - echo "Method 2 alternative: Getting ECR password..."
-      - ECR_PASSWORD=$(aws ecr get-login-password --region $AWS_DEFAULT_REGION)
-      - echo $ECR_PASSWORD | docker login --username AWS --password-stdin $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com
-      
-      # Test Docker
-      - echo "Testing Docker..."
-      - docker version
-      
-      # Create .env file
-      - echo "Creating .env file..."
-      - cat > .env << EOF
-APP_NAME="${APP_NAME}"
-APP_ENV=${APP_ENV}
-APP_KEY=${APP_KEY}
-APP_DEBUG=${APP_DEBUG}
-APP_URL=${APP_URL}
-DB_CONNECTION=${DB_CONNECTION}
-DB_HOST=${DB_HOST}
-DB_PORT=${DB_PORT}
-DB_DATABASE=${DB_DATABASE}
-DB_USERNAME=${DB_USERNAME}
-DB_PASSWORD=${DB_PASSWORD}
-LOG_CHANNEL=${LOG_CHANNEL}
-QUEUE_CONNECTION=${QUEUE_CONNECTION}
-SESSION_DRIVER=${SESSION_DRIVER}
-SESSION_LIFETIME=${SESSION_LIFETIME}
-EOF
-      
-      - echo ".env file created"
-      - echo "Displaying .env (without sensitive data)..."
-      - head -3 .env
+      # Create minimal .env
+      - echo "APP_ENV=production" > .env
+      - echo "APP_DEBUG=false" >> .env
 
   build:
     commands:
-      - echo "Build started at $(date)"
-      - echo "Building Docker image..."
-      - docker build -t $IMAGE_REPO_NAME:$IMAGE_TAG .
-      - echo "Tagging image..."
-      - docker tag $IMAGE_REPO_NAME:$IMAGE_TAG $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/$IMAGE_REPO_NAME:$IMAGE_TAG
-      - docker tag $IMAGE_REPO_NAME:$IMAGE_TAG $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/$IMAGE_REPO_NAME:latest
-      - echo "Images tagged successfully"
+      - docker build -t demo-app .
+      - docker tag demo-app:latest 407927038386.dkr.ecr.us-east-1.amazonaws.com/demo-app:latest
 
   post_build:
     commands:
-      - echo "Pushing images to ECR..."
-      - docker push $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/$IMAGE_REPO_NAME:$IMAGE_TAG
-      - docker push $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/$IMAGE_REPO_NAME:latest
-      
-      - echo "Creating imagedefinitions.json for ECS deployment..."
-      - cat > imagedefinitions.json << EOF
-[
-  {
-    "name": "$CONTAINER_NAME",
-    "imageUri": "$AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/$IMAGE_REPO_NAME:$IMAGE_TAG"
-  }
-]
-EOF
-      
-      - echo "imagedefinitions.json created successfully"
-      - cat imagedefinitions.json
+      - docker push 407927038386.dkr.ecr.us-east-1.amazonaws.com/demo-app:latest
+      - echo '[{"name":"demo-app","imageUri":"407927038386.dkr.ecr.us-east-1.amazonaws.com/demo-app:latest"}]' > imagedefinitions.json
 
 artifacts:
   files:
     - 'imagedefinitions.json'
-  discard-paths: yes
