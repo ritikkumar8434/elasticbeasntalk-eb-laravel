@@ -1,0 +1,53 @@
+version: 0.2
+
+phases:
+  pre_build:
+    commands:
+      - echo "Logging in to Amazon ECR..."
+      - aws --version
+      - $(aws ecr get-login-password --region $AWS_DEFAULT_REGION | docker login --username AWS --password-stdin $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com)
+      - echo "Checking for existing .env file"
+      - if [ -f .env ]; then cp .env .env.backup; fi
+      - echo "Creating .env file from environment variables"
+      - echo "APP_NAME=\"${APP_NAME}\"" >> .env
+      - echo "APP_ENV=${APP_ENV}" >> .env
+      - echo "APP_KEY=${APP_KEY}" >> .env
+      - echo "APP_DEBUG=${APP_DEBUG}" >> .env
+      - echo "APP_URL=${APP_URL}" >> .env
+      - echo "DB_CONNECTION=${DB_CONNECTION}" >> .env
+      - echo "DB_HOST=${DB_HOST}" >> .env
+      - echo "DB_PORT=${DB_PORT}" >> .env
+      - echo "DB_DATABASE=${DB_DATABASE}" >> .env
+      - echo "DB_USERNAME=${DB_USERNAME}" >> .env
+      - echo "DB_PASSWORD=${DB_PASSWORD}" >> .env
+      - echo "LOG_CHANNEL=${LOG_CHANNEL}" >> .env
+      - echo "QUEUE_CONNECTION=${QUEUE_CONNECTION}" >> .env
+      - echo "SESSION_DRIVER=${SESSION_DRIVER}" >> .env
+      - echo "SESSION_LIFETIME=${SESSION_LIFETIME}" >> .env
+      - echo "Verifying .env file"
+      - head -10 .env
+
+  build:
+    commands:
+      - echo "Build started on `date`"
+      - echo "Building the Docker image..."
+      - docker build -t $IMAGE_REPO_NAME:$IMAGE_TAG .
+      - echo "Tagging image for ECR..."
+      - docker tag $IMAGE_REPO_NAME:$IMAGE_TAG $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/$IMAGE_REPO_NAME:$IMAGE_TAG
+      - docker tag $IMAGE_REPO_NAME:$IMAGE_TAG $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/$IMAGE_REPO_NAME:latest
+
+  post_build:
+    commands:
+      - echo "Pushing image to ECR..."
+      - docker push $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/$IMAGE_REPO_NAME:$IMAGE_TAG
+      - docker push $AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/$IMAGE_REPO_NAME:latest
+      - echo "Creating imagedefinitions.json for ECS deployment..."
+      - IMAGE_URI="$AWS_ACCOUNT_ID.dkr.ecr.$AWS_DEFAULT_REGION.amazonaws.com/$IMAGE_REPO_NAME:$IMAGE_TAG"
+      - echo "[{\"name\":\"$CONTAINER_NAME\",\"imageUri\":\"$IMAGE_URI\"}]" > imagedefinitions.json
+      - echo "imagedefinitions.json created"
+      - cat imagedefinitions.json
+
+artifacts:
+  files:
+    - 'imagedefinitions.json'
+  discard-paths: yes
