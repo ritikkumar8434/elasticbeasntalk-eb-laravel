@@ -13,12 +13,12 @@ phases:
   build:
     commands:
       - docker build -t demo-app .
-      - docker tag demo-app:latest 407927038386.dkr.ecr.us-east-1.amazonaws.com/demo-app:latest
+      - docker tag demo-app:latest 407927038386.dkr.ecr.us-east-1.amazonaws.com/laravel:latest
 
   post_build:
     commands:
-      - docker push 407927038386.dkr.ecr.us-east-1.amazonaws.com/demo-app:latest
-      - echo '[{"name":"demo-app","imageUri":"407927038386.dkr.ecr.us-east-1.amazonaws.com/demo-app:latest"}]' > imagedefinitions.json
+      - docker push 407927038386.dkr.ecr.us-east-1.amazonaws.com/laravel:latest
+      - echo '[{"name":"laravel","imageUri":"407927038386.dkr.ecr.us-east-1.amazonaws.com/laravel:latest"}]' > imagedefinitions.json
 
 artifacts:
   files:
