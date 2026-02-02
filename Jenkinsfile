@@ -37,8 +37,8 @@ pipeline {
         stage('Build Docker Image') {
             steps {
                 sh '''
-                  docker build -t laravel:${IMAGE_TAG} .
-                  docker tag laravel:${IMAGE_TAG} ${ECR_REPO}:${IMAGE_TAG}
+                  sudo docker build -t laravel:${IMAGE_TAG} .
+                  sudo docker tag laravel:${IMAGE_TAG} ${ECR_REPO}:${IMAGE_TAG}
                 '''
             }
         }
@@ -46,7 +46,7 @@ pipeline {
         stage('Push Image to ECR') {
             steps {
                 sh '''
-                  docker push ${ECR_REPO}:${IMAGE_TAG}
+                  sudo docker push ${ECR_REPO}:${IMAGE_TAG}
                 '''
             }
         }
@@ -55,8 +55,8 @@ pipeline {
             steps {
                 sh '''
                   aws ecs update-service \
-                    --cluster laravel-cluster \
-                    --service laravel-service \
+                    --cluster laravel-app-cluster \
+                    --service Laravel-app-TD-service-pwfwcjgl \
                     --force-new-deployment \
                     --region ${AWS_REGION}
                 '''
