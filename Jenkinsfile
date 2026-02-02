@@ -3,7 +3,7 @@ pipeline {
 
     environment {
         AWS_REGION = "us-east-1"
-        ECR_REPO = "058264136175.dkr.ecr.us-east-1.amazonaws.com/laravel"
+        ECR_REPO = "741853493541.dkr.ecr.us-east-1.amazonaws.com/laravel"
         IMAGE_TAG = "latest"
         AWS_CREDENTIALS = "aws-creds"
     }
@@ -77,3 +77,4 @@ pipeline {
         }
     }
 }
+
