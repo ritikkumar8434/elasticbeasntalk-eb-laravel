@@ -4,7 +4,7 @@ phases:
   pre_build:
     commands:
       # Simplified ECR login
-      - aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin 407927038386.dkr.ecr.us-east-1.amazonaws.com
+      - aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin 058264136175.dkr.ecr.us-east-1.amazonaws.com
       
       # Create minimal .env
       - echo "APP_ENV=production" > .env
@@ -12,13 +12,13 @@ phases:
 
   build:
     commands:
-      - docker build -t demo-app .
-      - docker tag demo-app:latest 407927038386.dkr.ecr.us-east-1.amazonaws.com/laravel:latest
+      - docker build -t laravel:latest .
+      - docker tag laravel:latest 058264136175.dkr.ecr.us-east-1.amazonaws.com/laravel:latest
 
   post_build:
     commands:
-      - docker push 407927038386.dkr.ecr.us-east-1.amazonaws.com/laravel:latest
-      - echo '[{"name":"laravel","imageUri":"407927038386.dkr.ecr.us-east-1.amazonaws.com/laravel:latest"}]' > imagedefinitions.json
+      - docker push 058264136175.dkr.ecr.us-east-1.amazonaws.com/laravel:latest
+      - echo '[{"name":"laravel","imageUri":"058264136175.dkr.ecr.us-east-1.amazonaws.com/laravel:latest"}]' > imagedefinitions.json
 
 artifacts:
   files:
