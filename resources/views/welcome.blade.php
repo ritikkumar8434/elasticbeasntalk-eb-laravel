@@ -41,7 +41,7 @@
                     </svg>
                 </div>
             </div>
-            <h1 class="text-5xl font-bold text-white mb-4">Welcome to Our Platform</h1>
+            <h1 class="text-5xl font-bold text-white mb-4">Welcome to Our Platfor Changes done for testing CI/CD</h1>
             <p class="text-xl text-white/80 max-w-2xl mx-auto">
                 Build your next big idea with the most popular PHP framework. 
                 We've got everything you need to get started.
