@@ -37,8 +37,8 @@ pipeline {
         stage('Build Docker Image') {
             steps {
                 sh '''
-                  sudo docker build -t laravel:${IMAGE_TAG} .
-                  sudo docker tag laravel:${IMAGE_TAG} ${ECR_REPO}:${IMAGE_TAG}
+                  docker build -t laravel:${IMAGE_TAG} .
+                  docker tag laravel:${IMAGE_TAG} ${ECR_REPO}:${IMAGE_TAG}
                 '''
             }
         }
@@ -46,7 +46,7 @@ pipeline {
         stage('Push Image to ECR') {
             steps {
                 sh '''
-                  sudo docker push ${ECR_REPO}:${IMAGE_TAG}
+                  docker push ${ECR_REPO}:${IMAGE_TAG}
                 '''
             }
         }
