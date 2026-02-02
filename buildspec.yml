@@ -7,8 +7,9 @@ phases:
       - aws ecr get-login-password --region us-east-1 | docker login --username AWS --password-stdin 058264136175.dkr.ecr.us-east-1.amazonaws.com
       
       # Create minimal .env
-      - echo "APP_ENV=production" > .env
+      - echo "APP_ENV=production" >> .env
       - echo "APP_DEBUG=false" >> .env
+      - echo "DB_CONNECTION=mysql" >> .env
 
   build:
     commands:
